@@ -1,0 +1,8 @@
+.idea
+.env
+node_modules
+photobot.db
+logs
+config/default.json
+config/production.json
+prisma/photobot.db

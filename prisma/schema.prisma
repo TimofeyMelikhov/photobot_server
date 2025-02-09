@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Photographer {
+  id             Int       @id @default(autoincrement())
+  tg_user_id     BigInt    @unique
+  tg_username    String
+  name           String
+  city           String
+  tg_channel     String?
+  portfolio_url  String?
+  other_resource String?
+  profile_photo  String?
+  created_at     DateTime  @default(now())
+  clients        Client[]
+  distributorLinks DistributorPhotographerLink[]
+  referrals      Referral[]
+}
+
+model Distributor {
+  id           Int       @id @default(autoincrement())
+  tg_user_id   BigInt    @unique 
+  username     String?
+  created_at   DateTime  @default(now())
+  distributorLinks DistributorPhotographerLink[]
+  clients      Client[]
+  referrals    Referral[]
+}
+
+model DistributorPhotographerLink {
+  id             Int           @id @default(autoincrement())
+  distributor_id Int
+  photographer_id Int
+  link           String
+  created_at     DateTime      @default(now())
+
+  distributor    Distributor   @relation(fields: [distributor_id], references: [id], onDelete: Cascade)
+  photographer   Photographer  @relation(fields: [photographer_id], references: [id], onDelete: Cascade)
+
+  @@unique([distributor_id, photographer_id])
+}
+
+model Client {
+  id                  Int       @id @default(autoincrement())
+  photographer_id     Int
+  tg_user_id          BigInt    @unique
+  tg_username         String
+  referrer_id         Int?
+  isConfirmed         Int?       
+  communicationMethod String?
+  created_at          DateTime  @default(now())
+
+  photographer        Photographer @relation(fields: [photographer_id], references: [id], onDelete: Cascade)
+  referrer            Distributor? @relation(fields: [referrer_id], references: [id], onDelete: SetNull)
+}
+
+model Referral {
+  id             Int           @id @default(autoincrement())
+  photographer_id Int
+  referrer_id    Int
+  created_at     DateTime      @default(now())
+
+  photographer   Photographer  @relation(fields: [photographer_id], references: [id], onDelete: Cascade)
+  referrer       Distributor   @relation(fields: [referrer_id], references: [id], onDelete: Cascade)
+}
