@@ -74,7 +74,7 @@ export const createNewReferral = async (req, res) => {
 };
 
 export const deletePhotographerProfile = async (req, res) => {
-  const { id } = req.body;
+  const { id } = req.params;
 
   try {
     await photographerService.deleteProfile(id);

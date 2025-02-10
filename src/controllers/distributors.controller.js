@@ -73,7 +73,7 @@ export const fetchReferralLink = async (req, res) => {
 };
 
 export const deleteDistributorProfile = async (req, res) => {
-  const { id } = req.body;
+  const { id } = req.params;
 
   try {
     await deleteProfile(id);
