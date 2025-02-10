@@ -22,7 +22,7 @@ router.get("/", getAllPhotographers);
 router.post("/create", createPhotographerProfile);
 router.post("/referral", createNewReferral);
 router.get("/check-user", checkUserByTgId);
-router.delete("/delete", deletePhotographerProfile);
+router.delete("/delete/:id", deletePhotographerProfile);
 router.get("/:id/clients", getPhotographerClients);
 +router.get("/:id/referrals", getReferralsAndClients);
 router.get("/:field/:id", getPhotographer);

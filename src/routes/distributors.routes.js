@@ -18,7 +18,7 @@ router.use((req, res, next) => {
 
 router.post("/", newDistributor);
 router.post("/link", addDistributorPhotographerLink);
-router.delete("/delete", deleteDistributorProfile);
+router.delete("/delete/:id", deleteDistributorProfile);
 router.get("/:id/clients", fetchDistributorClients);
 router.get("/link/:distributor_id/:photographer_id", fetchReferralLink);
 router.get("/:telegramId", getDistributor);
