@@ -3,8 +3,20 @@ import * as photographerService from "../services/photographer-service.js";
 export const getAllPhotographers = async (req, res) => {
   try {
     const photographers = await photographerService.fetchAllPhotographers();
-    if (photographers.length === 0) {
-      return res.status(404).json({ error: "No photographers found" });
+    if (!photographers.length) {
+      return res.status(404).json({
+        status: 404,
+        data: {
+          errors: [
+            {
+              type: "NotFound",
+              value: "photographers",
+              msg: "No photographers found",
+              location: "server",
+            },
+          ],
+        },
+      });
     }
     res.json(photographers);
   } catch (error) {
