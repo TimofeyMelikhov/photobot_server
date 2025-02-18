@@ -13,6 +13,7 @@
   "description": "",
   "dependencies": {
     "@prisma/client": "^6.2.1",
+    "axios": "^1.7.9",
     "compression": "^1.7.5",
     "config": "^3.3.12",
     "cors": "^2.8.5",
