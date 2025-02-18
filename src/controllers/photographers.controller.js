@@ -1,14 +1,94 @@
+import config from "config";
+import axios from "axios";
 import * as photographerService from "../services/photographer-service.js";
+
+const BOT_TOKEN = config.get("TELEGRAM_TOKEN");
 
 export const getAllPhotographers = async (req, res) => {
   try {
     const photographers = await photographerService.fetchAllPhotographers();
-    if (photographers.length === 0) {
-      return res.status(404).json({ error: "No photographers found" });
+    if (!photographers.length) {
+      return res.status(404).json({
+        status: 404,
+        data: {
+          errors: [
+            {
+              type: "NotFound",
+              value: "photographers",
+              msg: "No photographers found",
+              location: "server",
+            },
+          ],
+        },
+      });
     }
     res.json(photographers);
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+};
+
+export const broadcastPhotographers = async (req, res) => {
+  try {
+    const { message } = req.body;
+
+    if (!message) {
+      return res.status(400).json({ error: "Message is required" });
+    }
+
+    const photographers = await photographerService.fetchAllPhotographers();
+    const idArray = photographers.map((ph) => ph.tg_user_id);
+    const sendWithDelay = async (ids, delayMs) => {
+      for (let i = 0; i < ids.length; i++) {
+        try {
+          await axios.post(
+            `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,
+            {
+              chat_id: ids[i],
+              text: message,
+              parse_mode: "Markdown",
+            }
+          );
+
+          console.log(`✅ Сообщение отправлено пользователю ${ids[i]}`);
+
+          // Ждём перед следующим запросом
+          if (i < ids.length - 1) {
+            await new Promise((resolve) => setTimeout(resolve, delayMs));
+          }
+        } catch (error) {
+          if (error.response) {
+            const errData = error.response.data;
+
+            // 📌 Обрабатываем ошибки Telegram API
+            if (errData.error_code === 403) {
+              console.warn(`🚨 Бот заблокирован у пользователя ${ids[i]}!`);
+            } else if (errData.error_code === 400) {
+              console.warn(
+                `❌ Ошибка "chat not found" у ${ids[i]}. Возможно, аккаунт удалён.`
+              );
+            } else if (errData.error_code === 429) {
+              console.warn(
+                `⏳ Превышен лимит запросов! Telegram просит подождать.`
+              );
+              await new Promise((resolve) =>
+                setTimeout(resolve, errData.parameters.retry_after * 1000)
+              );
+              i--; // Повторяем отправку для этого же ID
+            } else {
+              console.error(`⚠️ Ошибка у ${ids[i]}:`, errData);
+            }
+          } else {
+            console.error(`⚠️ Ошибка сети у ${ids[i]}:`, error.message);
+          }
+        }
+      }
+    };
+    sendWithDelay(idArray, 35); // 35 мс = 1000 мс / 30 сообщений
+
+    res.status(201).json({ message: "Broadcast started successfully" });
+  } catch (error) {
+    console.log(error);
   }
 };
 

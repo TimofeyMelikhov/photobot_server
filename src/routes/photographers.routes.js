@@ -8,6 +8,7 @@ import {
   createNewReferral,
   deletePhotographerProfile,
   checkUserByTgId,
+  broadcastPhotographers,
 } from "../controllers/photographers.controller.js";
 import { logger } from "../middleware/logger.js";
 
@@ -24,7 +25,8 @@ router.post("/referral", createNewReferral);
 router.get("/check-user", checkUserByTgId);
 router.delete("/delete/:id", deletePhotographerProfile);
 router.get("/:id/clients", getPhotographerClients);
-+router.get("/:id/referrals", getReferralsAndClients);
+router.get("/:id/referrals", getReferralsAndClients);
 router.get("/:field/:id", getPhotographer);
+router.post("/broadcast", broadcastPhotographers);
 
 export default router;
